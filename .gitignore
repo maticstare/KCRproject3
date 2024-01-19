@@ -1,0 +1,13 @@
+# Ignore everything
+*
+# Except these files
+!.gitignore
+!report3.pdf
+!report3.tex
+!project3.m
+!mcode/*
+!mcode/
+!graphs/*
+!graphs/
+!eegmmidb/*
+!eegmmidb/
