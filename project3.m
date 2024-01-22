@@ -5,15 +5,13 @@
 %task1: S020R03.edf
 %task1: S020R07.edf
 %task1: S020R11.edf
-
-
 n_of_freq_bands = 10;
 
-baselineOpen = read_data('eegmmidb/S020/S020R01.edf');
-%baselineClosed = read_data('eegmmidb/S020/S020R02.edf');
-task11 = read_data('eegmmidb/S020/S020R03.edf');
-task12 = read_data('eegmmidb/S020/S020R07.edf');
-task13 = read_data('eegmmidb/S020/S020R11.edf');
+[baselineOpen, tm] = read_data('eegmmidb/S020/S020R01.edf');
+%[baselineClosed, tm] = read_data('eegmmidb/S020/S020R02.edf');
+[task11, ~] = read_data('eegmmidb/S020/S020R03.edf');
+[task12, ~] = read_data('eegmmidb/S020/S020R07.edf');
+[task13, ~] = read_data('eegmmidb/S020/S020R11.edf');
 
 size_of_baseline = size(baselineOpen, 1);
 
@@ -26,23 +24,29 @@ mean_of_task = mean(task, 3);
 
 freq_bands_of_task = split_freq_bands(mean_of_task, n_of_freq_bands);
 
-
-
-Rsquared = zeros(64, n_of_freq_bands);
+r_squared = zeros(64, n_of_freq_bands);
 for i = 1:64
     for j = 1:n_of_freq_bands
-        Rsquared(i, j) = r2(baselineOpen(:, i), freq_bands_of_task(:, i, j));
+        r_squared(i, j) = r2(baselineOpen(:, i), freq_bands_of_task(:, i, j));
     end
 end
 
-hmap = heatmap(Rsquared);
-hmap.Title = 'R kvadrat';
-hmap.XLabel = 'Frekvenčni pas';
-hmap.YLabel = 'Kanal elektrode';
+figure
+heatmap(r_squared);
+title('Mape značilk na osnovi kriterija R kvadrat')
+xlabel('Frekvenčni pas')
+ylabel('Kanal elektrode')
+
+figure
+plot(tm, freq_bands_of_task(:, 64, 10).^2);
+title('Moč signala 64. kanala 10. frekvenčnega pasu v odvisnosti od časa')
+xlabel('Čas')
+ylabel('Moč signala')
+
 
 %functions
-function sigs = read_data(path)
-    [sigs,~,~] = rdsamp(path);
+function [sigs, tm] = read_data(path)
+    [sigs,~,tm] = rdsamp(path);
     sigs = sigs(:, 1:64);
 end
 
@@ -69,4 +73,3 @@ function out = r2(x, y)
     lin_model = fitlm(x, y);
     out = lin_model.Rsquared.Ordinary;
 end
-
