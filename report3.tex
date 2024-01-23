@@ -24,68 +24,57 @@
 \cfoot{\thepage}
 \renewcommand{\headrulewidth}{0.4pt}
 \renewcommand{\footrulewidth}{0.4pt}
+\renewcommand{\figurename}{Slika}
 \begin{document}
 % Title
 \title{Identifikacija relevantnih značilk za klasifikacijo alfa ritmov}
 \author{Matic Stare}
 \date{\today}
 
-
-
 \maketitle
 
-
 \begin{abstract}
-    abstract-text
+    V tem poročilu bomo predstavili postopek, ki smo ga uporabili pri izbiri značilk za klasifikacijo alfa ritmov iz EEG signalov. V ta namen smo napisali program, ki nam je pomagal pri izbiri značilk. Na koncu smo izbrali značilko z najvišjo vrednost kriterija $R^2$ in na njej izračunali moč signala.
 \end{abstract}
-
 
 % Sections
 \section{Uvod}
 \label{sec:introduction}
 
-%Preden začnemo z obravnavo EEG signalov je potrebno odstraniti očesne artefakte, na katere vpliva gibanje oči. V tem članku bomo predstavili postopek analize neodvisnih komponent (ANK), ki je namenjen odstranjevanju očesnih artefaktov iz EEG signalov. Implementirali smo program, ki s pomočjo algoritma FastICA izvede dekompozicijo EEG signala na neodvisne komponente.
+Preden začnemo s klasifikacijo EEG signalov je potrebno najprej izbrati ustrezne značilke. V ta namen smo v programskem jeziku MATLAB implementirali algoritem, ki nam pomaga pri izbiri značilk za klasifikacijo alfa ritmov iz EEG signalov, ki smo jih pridobili iz podatkovne baze EEGMMI. Ta je dostopna na povezavi \href[]{https://www.physionet.org/content/eegmmidb/1.0.0/}{Physionet}. V nadaljevanju bomo opisali postopek, ki smo ga uporabili pri njihovi izbiri.
 
 
 \section{Metode}
 \label{sec:methodology}
 
-%Iz podatkovne baze EEGMMI (ki je dostopna na povezavi \href[]{https://www.physionet.org/content/eegmmidb/1.0.0/}{Physionet}) smo naključno izbrali en subjekt. Ker poskušamo izločiti očesne artefakte, smo izbrali prvo vajo, pri kateri je imel subjekt odprte oči. Program smo implementirali v programskem okolju MATLAB. Za branje EEG signalov, pa smo si pomagali s paketom WFDB. Za izvedbo ANK smo uporabili algoritem FastICA, ki smo ga uporabili tudi na laboratorijskih vajah. Z namenom, da bi vse komponente konvergirale, smo nastavili maksimalno število iteracij na 5000. Program smo testirali na posnetku \textbf{S020R01.edf}.
+Iz podatkovne baze EEGMMI smo naključno izbrali en subjekt (številka 20). Ta vsebuje 14 različnih datotek s signali. Za branje EEG signalov, pa smo si pomagali s paketom WFDB. Ker želimo izbrati značilke za klasifikacijo alfa ritmov, smo izbrali prvo datoteko, kjer je imel subjekt odprte oči in v nadaljevanju služi kot \emph{baseline} posnetek. Potem smo izbrali še datoteke 3, 7 in 11, kjer je subjekt izvajal prvo mentalno vajo (odpiranje in zapiranje leve ali desne pesti). Z namenom, da bi bili naši podatki čim bolj reprezentativni, smo izračunali povprečje slednjih datotek in ga uporabili kot \emph{mean} posnetek. Ko smo pridobili in uredili navedene podatke, smo \emph{mean} s pomočjo Fourierjeve transformacije pretvorili v frekvenčni prostor. Nato smo ga razdelili na 10 frekvenčnih pasov in s pomočjo inverzne Fourierjeve transformacije prevedli nazaj. Potem smo vsakemu pasu s pomočjo kriterija $R^2$ izračunali koeficient z \emph{baseline} posnetkom. Dobljeno matriko smo vizualizirali s pomočjo \emph{heatmap-a}. Na njem smo izbrali polje z najvišjo vrednostjo in na signalu, ki mu pripada, in ustreznem frekvenčnem pasu izračunali moč. 
+
+
 
 \section{Rezultati}
 \label{sec:results}
-%Na sliki \ref{fig:decomposed} pa so prikazani signali posameznih elektrod. Vidimo lahko, da se komponente med 22 in 38 precej razlikujejo od ostalih. To ni naklučje, saj so to ravno komponente elektrod, ki so pritrjene blizu oči.
 
-%Na sliki \ref{fig:original} je prikazan originalni EEG signal. Na sliki \ref{fig:newSigs} so prikazani signali, ki smo jih dobili po odstranitvi komponent, ki so povezane z očesnimi artefakti. Vidimo lahko, da signali nimajo več toliko odstopanj, kot so jih imeli v originalnem signalu.
-
-
-%\begin{figure}[H]
-%    \centering
-%    \includegraphics[width=\textwidth]{decompSigs.png}
-%    \caption{Signali posameznih elektrod.}
-%    \label{fig:decomposed}
-%\end{figure}
+Na Sliki \ref{fig:r2} so prikazane mape značilk na osnovi kriterija $R^2$. Temno modra barva predstavlja večjo korelacijo med posnetkoma, kot bela. Vidimo lahko, da je največji koeficient na 64. kanalu v 10. frekvenčnem pasu. Zato smo ta signal uporabili naprej in na njem izračunali njegovo moč. To smo skupaj s podatkom o časovni oznaki vizualizirali na Sliki \ref{fig:power}, kjer je prikazana moč signala 64. kanala 10. frekvenčnega pasu v odvisnosti od časa.
 
 
-
-%\begin{figure}[H]
-%    \begin{subfigure}{0.49\linewidth}
-%        \centering
-%        \includegraphics[width=\textwidth]{sigs.png}
-%        \caption{Originalni EEG signal.}\label{fig:original}
-%    \end{subfigure}
-%   \begin{subfigure}{0.49\linewidth}
-%        \centering
-%        \includegraphics[width=\textwidth]{newSigs.png}
-%        \caption{EEG signal z odstranjenimi očesnimi artefakti.}\label{fig:newSigs}
-%    \end{subfigure}
-%    \caption{Before and after graph}\label{fig:beforeAfter}
-%\end{figure}
+\begin{figure}[H]
+    \begin{subfigure}{0.49\linewidth}
+        \centering
+        \includegraphics[width=\textwidth]{r2.png}
+        \caption{Mape značilk na osnovi kriterija R kvadrat.}\label{fig:r2}
+    \end{subfigure}
+   \begin{subfigure}{0.49\linewidth}
+        \centering
+        \includegraphics[width=\textwidth]{power.png}
+        \caption{Moč signala 64. kanala 10. frekvenčnega pasu v odvisnosti od časa.}\label{fig:power}
+    \end{subfigure}
+    \caption{Grafa}\label{fig:graphs}
+\end{figure}
 
 
 \section{Diskusija}
 \label{sec:discussion}
 
-%Vidimo lahko, da je postopek ANK zelo učinkovit pri odstranjevanju očesnih artefaktov, saj je v novem signalu precej manj šuma. Vendar pa je potrebno biti previden pri izbiri komponent, ki jih želimo odstraniti. V našem primeru smo odstranili komponente, ki so bile povezane z očesnimi artefakti. Kot nadalnje delo, bi lahko poskusili odstraniti tudi komponente, ki so povezane z drugimi artefakti.
+Iz Slike \ref{fig:r2} lahko razberemo, da so vrednosti izjemno majhne. To je posledica dejstva, da vaja, ki jo je subjekt izvajal, ne vsebuje premikanje oči. Kot možnost za nadaljnje delo bi lahko pridobili posnetke, v katerih subjekt to počne, in podobno analizo izvedli na njih.
 
 \end{document}
